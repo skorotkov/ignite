@@ -13,30 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License
 
-"""
-This module contains classes and utilities for Ignite DataStorage configuration.
-"""
-
 from typing import NamedTuple
 
 
-class DataRegionConfiguration(NamedTuple):
-    """
-    Ignite DataRegion Configuration
-    """
-    name: str = "default"
-    persistent: bool = False
-    init_size: int = 100 * 1024 * 1024
-    max_size: int = 512 * 1024 * 1024
-    metrics_enabled: bool = True
-    metrics_rate_time_interval: int = None
+class OpencensysMetrics(NamedTuple):
+    TEMPLATE_FILE = "opencensys_metrics_beans_macro.j2"
+    ENABLED = "opencensys_metrics_enabled"
+    NAME = "OpencensysMetrics"
 
-
-class DataStorageConfiguration(NamedTuple):
-    """
-    Ignite DataStorage configuration
-    """
-    default: DataRegionConfiguration = DataRegionConfiguration()
-    max_wal_archive_size: int = None
-    metrics_enabled: bool = True
-    regions: list = []
+    name: str = NAME
+    period: int = 1000
+    server_port: int = 8081

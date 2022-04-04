@@ -56,7 +56,9 @@ class IgniteConfiguration(NamedTuple):
     plugins: list = []
     ext_beans: list = []
     peer_class_loading_enabled: bool = True
-    metric_exporter: str = None
+    metrics_log_frequency: int = 15000
+    metrics_update_frequency: int = 1000
+    metric_exporters: set = set()
     rebalance_thread_pool_size: int = None
     rebalance_batch_size: int = None
     rebalance_batches_prefetch_count: int = None

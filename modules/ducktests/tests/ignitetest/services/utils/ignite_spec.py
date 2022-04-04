@@ -30,6 +30,8 @@ from ignitetest.services.utils.config_template import IgniteClientConfigTemplate
 from ignitetest.services.utils.jvm_utils import create_jvm_settings, merge_jvm_settings
 from ignitetest.services.utils.path import get_home_dir, get_module_path, IgnitePathAware
 from ignitetest.services.utils.ssl.ssl_params import is_ssl_enabled
+from ignitetest.services.utils.metrics.opencensys_metrics import OpencensysMetrics
+from ignitetest.services.utils.bean import Bean
 from ignitetest.utils.ignite_test import JFR_ENABLED
 from ignitetest.utils.version import DEV_BRANCH
 
@@ -134,6 +136,19 @@ class IgniteSpec(metaclass=ABCMeta):
         """
         Extend config with custom variables
         """
+        def any(predicate, list):
+            return next(filter(predicate, list), None)
+
+        if config.service_type == IgniteServiceType.NODE and \
+                self.service.context.globals.get(OpencensysMetrics.ENABLED, False):
+            if config.metrics_update_frequency is None:
+                config = config._replace(metrics_update_frequency=1000)
+            config.metric_exporters.add(Bean("org.apache.ignite.spi.metric.opencensus.OpenCensusMetricExporterSpi",
+                                             period=1000))
+
+            if not any(lambda bean: (bean[1].name and bean[1].name == OpencensysMetrics.NAME), config.ext_beans):
+                config.ext_beans.append((OpencensysMetrics.TEMPLATE_FILE, OpencensysMetrics()))
+
         return config
 
     def __home(self, product=None):

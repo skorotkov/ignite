@@ -57,9 +57,21 @@
             <property name="rebalanceThrottle" value="{{ config.rebalance_throttle }}"/>
         {% endif %}
 
-        {% if config.metric_exporter %}
+        {% if config.metrics_log_frequency %}
+            <property name="metricsLogFrequency" value="{{ config.metrics_log_frequency }}"/>
+        {% endif %}
+
+        {% if config.metrics_update_frequency %}
+            <property name="metricsUpdateFrequency" value="{{ config.metrics_update_frequency }}"/>
+        {% endif %}
+
+        {% if config.metric_exporters | length > 0 %}
             <property name="metricExporterSpi">
-                <bean class="{{ config.metric_exporter }}"/>
+                <list>
+                {% for exporter in config.metric_exporters %}
+                    {{ misc_utils.bean(exporter) }}
+                {% endfor %}
+                </list>
             </property>
         {% endif %}
 
