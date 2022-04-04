@@ -42,6 +42,7 @@ class IgniteConfiguration(NamedTuple):
     cluster_state: str = 'ACTIVE'
     client_mode: bool = False
     consistent_id: str = None
+    ignite_instance_name: str = None
     failure_detection_timeout: int = 10000
     sys_worker_blocked_timeout: int = 10000
     properties: str = None

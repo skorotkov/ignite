@@ -30,9 +30,8 @@ from ignitetest.services.utils.config_template import IgniteClientConfigTemplate
 from ignitetest.services.utils.jvm_utils import create_jvm_settings, merge_jvm_settings
 from ignitetest.services.utils.path import get_home_dir, get_module_path, IgnitePathAware
 from ignitetest.services.utils.ssl.ssl_params import is_ssl_enabled
-from ignitetest.services.utils.metrics.opencensys_metrics import OpencensysMetrics
-from ignitetest.services.utils.bean import Bean
-from ignitetest.utils.ignite_test import JFR_ENABLED
+from ignitetest.services.utils.metrics.metrics import OpencensysMetrics, JmxMetrics
+from ignitetest.utils.ignite_test import JFR_ENABLED, JMX_REMOTE_ENABLED
 from ignitetest.utils.version import DEV_BRANCH
 
 SHARED_PREPARED_FILE = ".ignite_prepared"
@@ -112,6 +111,15 @@ class IgniteSpec(metaclass=ABCMeta):
                                                    "-XX:StartFlightRecording=dumponexit=true," +
                                                    f"filename={self.service.jfr_dir}/recording.jfr"])
 
+        if self.service.context.globals.get(JMX_REMOTE_ENABLED, False):
+            default_jvm_opts = merge_jvm_settings(default_jvm_opts,
+                                                  ["-Dcom.sun.management.jmxremote",
+                                                   "-Dcom.sun.management.jmxremote.port=1098",
+                                                   "-Dcom.sun.management.jmxremote.rmi.port=1098",
+                                                   "-Dcom.sun.management.jmxremote.local.only=false",
+                                                   "-Dcom.sun.management.jmxremote.authenticate=false",
+                                                   "-Dcom.sun.management.jmxremote.ssl=false"])
+
         return default_jvm_opts
 
     def config_templates(self):
@@ -136,18 +144,16 @@ class IgniteSpec(metaclass=ABCMeta):
         """
         Extend config with custom variables
         """
-        def any(predicate, list):
-            return next(filter(predicate, list), None)
+        if config.service_type == IgniteServiceType.NODE:
+            if OpencensysMetrics.enabled(self.service.context.globals):
+                config = OpencensysMetrics.add_to_config(config, self.service.context.globals)
 
-        if config.service_type == IgniteServiceType.NODE and \
-                self.service.context.globals.get(OpencensysMetrics.ENABLED, False):
-            if config.metrics_update_frequency is None:
-                config = config._replace(metrics_update_frequency=1000)
-            config.metric_exporters.add(Bean("org.apache.ignite.spi.metric.opencensus.OpenCensusMetricExporterSpi",
-                                             period=1000))
+            if JmxMetrics.enabled(self.service.context.globals):
+                config = JmxMetrics.add_to_config(config)
 
-            if not any(lambda bean: (bean[1].name and bean[1].name == OpencensysMetrics.NAME), config.ext_beans):
-                config.ext_beans.append((OpencensysMetrics.TEMPLATE_FILE, OpencensysMetrics()))
+            if (OpencensysMetrics.enabled(self.service.context.globals) or
+                JmxMetrics.enabled(self.service.context.globals)):
+                config = config._replace(ignite_instance_name=self.service.context.test_name)
 
         return config
 
