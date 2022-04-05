@@ -152,8 +152,8 @@ class IgniteSpec(metaclass=ABCMeta):
                 config = JmxMetrics.add_to_config(config)
 
             if (OpencensysMetrics.enabled(self.service.context.globals) or
-                JmxMetrics.enabled(self.service.context.globals)):
-                config = config._replace(ignite_instance_name=self.service.context.test_name)
+                    JmxMetrics.enabled(self.service.context.globals)):
+                config = config._replace(ignite_instance_name=self.service.context.test_name.replace("=", ".."))
 
         return config
 
@@ -186,9 +186,13 @@ class IgniteSpec(metaclass=ABCMeta):
         libs = self.service.modules or []
 
         libs.append("log4j2")
-        libs.append("ducktests")
 
-        return list(map(lambda m: os.path.join(self._module(m), "*"), libs))
+        if OpencensysMetrics.enabled(self.service.context.globals):
+            libs.append("opencensus")
+
+        return [os.path.join(self.__home(str(DEV_BRANCH)), "modules", "ducktests", "target", "*"),
+                os.path.join(self.__home(str(DEV_BRANCH)), "modules", "ducktests", "target", "libs", "*"),
+                *list(map(lambda m: os.path.join(self._module(m), "*"), libs))]
 
     def envs(self):
         """

@@ -54,7 +54,8 @@ class OpencensysMetrics(NamedTuple):
 
         metrics_params = OpencensysMetrics.from_globals(globals)
         config.metric_exporters.add(Bean("org.apache.ignite.spi.metric.opencensus.OpenCensusMetricExporterSpi",
-                                         period=metrics_params.period))
+                                         period=metrics_params.period,
+                                         sendInstanceName=True))
 
         if not any((bean[1].name and bean[1].name == OPENCENSYS_NAME) for bean in config.ext_beans):
             config.ext_beans.append((OPENCENSYS_TEMPLATE_FILE, metrics_params))

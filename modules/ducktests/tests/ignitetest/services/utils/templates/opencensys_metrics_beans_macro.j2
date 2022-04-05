@@ -17,11 +17,6 @@
 
 {% macro apply(config, metrics) %}
 
-    <bean id="metricExporter" class="org.apache.ignite.spi.metric.opencensus.OpenCensusMetricExporterSpi">
-        <property name="period" value="{{ metrics.period }}" />
-        <property name="sendInstanceName" value="true" />
-    </bean>
-
     <bean id="opencensusWrapper" class="org.springframework.beans.factory.config.MethodInvokingBean">
         <property name="staticMethod" value="io.opencensus.exporter.stats.prometheus.PrometheusStatsCollector.createAndRegister"/>
     </bean>
