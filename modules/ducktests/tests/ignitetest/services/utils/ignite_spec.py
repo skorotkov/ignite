@@ -23,6 +23,7 @@ import json
 import os
 import subprocess
 from abc import ABCMeta, abstractmethod
+from re import sub
 
 from ignitetest.services.utils import IgniteServiceType
 from ignitetest.services.utils.config_template import IgniteClientConfigTemplate, IgniteServerConfigTemplate, \
@@ -30,7 +31,7 @@ from ignitetest.services.utils.config_template import IgniteClientConfigTemplate
 from ignitetest.services.utils.jvm_utils import create_jvm_settings, merge_jvm_settings
 from ignitetest.services.utils.path import get_home_dir, get_module_path, IgnitePathAware
 from ignitetest.services.utils.ssl.ssl_params import is_ssl_enabled
-from ignitetest.services.utils.metrics.metrics import OpencensysMetrics, JmxMetrics
+from ignitetest.services.utils.metrics.metrics import OpencensusMetrics, JmxMetrics
 from ignitetest.utils.ignite_test import JFR_ENABLED, JMX_REMOTE_ENABLED
 from ignitetest.utils.version import DEV_BRANCH
 
@@ -145,17 +146,21 @@ class IgniteSpec(metaclass=ABCMeta):
         Extend config with custom variables
         """
         if config.service_type == IgniteServiceType.NODE:
-            if OpencensysMetrics.enabled(self.service.context.globals):
-                config = OpencensysMetrics.add_to_config(config, self.service.context.globals)
+            if OpencensusMetrics.enabled(self.service):
+                config = OpencensusMetrics.add_to_config(config, self.service.context.globals)
 
-            if JmxMetrics.enabled(self.service.context.globals):
+            if JmxMetrics.enabled(self.service):
                 config = JmxMetrics.add_to_config(config)
 
-            if (OpencensysMetrics.enabled(self.service.context.globals) or
-                    JmxMetrics.enabled(self.service.context.globals)):
-                config = config._replace(ignite_instance_name=self.service.context.test_name.replace("=", ".."))
+            if (OpencensusMetrics.enabled(self.service) or
+                    JmxMetrics.enabled(self.service)):
+                config = config._replace(ignite_instance_name=self.__test_id(self.service.context.test_name))
 
         return config
+
+    @staticmethod
+    def __test_id(test_name: str):
+        return sub("^[0-9A-Fa-f]+@ignitetest\\.tests\\.", "", test_name).replace("=", ".")[:255]
 
     def __home(self, product=None):
         """
@@ -187,7 +192,7 @@ class IgniteSpec(metaclass=ABCMeta):
 
         libs.append("log4j2")
 
-        if OpencensysMetrics.enabled(self.service.context.globals):
+        if OpencensusMetrics.enabled(self.service):
             libs.append("opencensus")
 
         return [os.path.join(self.__home(str(DEV_BRANCH)), "modules", "ducktests", "target", "*"),
