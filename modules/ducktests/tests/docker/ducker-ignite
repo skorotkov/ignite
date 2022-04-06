@@ -658,7 +658,7 @@ shift
 case "${action}" in
     help) usage 0;;
 
-    build|up|test|log|ssh|down|purge|compare)
+    build|up|test|ssh|down|purge|compare)
         ducker_${action} "${@}"; exit 0;;
 
     *)  echo "Unknown command '${action}'.  Type '${script_path} --help' for usage information."
