@@ -17,11 +17,11 @@
 
 {% macro apply(config, metrics) %}
 
-    <bean id="opencensusWrapper" class="org.springframework.beans.factory.config.MethodInvokingBean">
+    <bean class="org.springframework.beans.factory.config.MethodInvokingBean">
         <property name="staticMethod" value="io.opencensus.exporter.stats.prometheus.PrometheusStatsCollector.createAndRegister"/>
     </bean>
 
-    <bean id="httpServer" class="io.prometheus.client.exporter.HTTPServer">
+    <bean class="io.prometheus.client.exporter.HTTPServer">
         <constructor-arg type="java.lang.String" value="{{ config.local_host }}"/>
         <constructor-arg type="int" value="{{ metrics.port }}"/>
         <constructor-arg type="boolean" value="true"/>
