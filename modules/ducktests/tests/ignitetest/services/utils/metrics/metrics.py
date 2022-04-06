@@ -15,7 +15,7 @@
 
 from typing import NamedTuple
 
-from ignitetest.services.utils.bean import Bean
+from ignitetest.utils.bean import Bean
 from ignitetest.utils.version import V_2_7_6
 
 METRICS_KEY = "metrics"
@@ -42,17 +42,17 @@ class OpencensusMetrics(NamedTuple):
                service.context.globals[METRICS_KEY][OPENCENSUS_KEY][ENABLED]
 
     @staticmethod
-    def from_globals(globals):
-        return OpencensusMetrics(period=globals[METRICS_KEY][OPENCENSUS_KEY].get("period", 1000),
-                                 port=globals[METRICS_KEY][OPENCENSUS_KEY].get("port", 8082),
+    def from_globals(_globals):
+        return OpencensusMetrics(period=_globals[METRICS_KEY][OPENCENSUS_KEY].get("period", 1000),
+                                 port=_globals[METRICS_KEY][OPENCENSUS_KEY].get("port", 8082),
                                  name=OPENCENSUS_NAME)
 
     @staticmethod
-    def add_to_config(config, globals):
+    def add_to_config(config, _globals):
         if config.metrics_update_frequency is None:
             config = config._replace(metrics_update_frequency=1000)
 
-        metrics_params = OpencensusMetrics.from_globals(globals)
+        metrics_params = OpencensusMetrics.from_globals(_globals)
         config.metric_exporters.add(Bean("org.apache.ignite.spi.metric.opencensus.OpenCensusMetricExporterSpi",
                                          period=metrics_params.period,
                                          sendInstanceName=True))
