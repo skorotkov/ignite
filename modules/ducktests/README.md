@@ -154,11 +154,15 @@ To export metrics in the Prometheus format via the HTTP use the following `--glo
 
 To separate metrics from different tests the `iin` label is used. It may be used in software like grafana for filtration.
 
-Label contains the dot concatenated test package name, test class name, test method name and set of name/value pairs for
-parameters, like: 
+Label contains the *test id* string: dot concatenated test package name, test class name, test method name and set of
+name/value pairs for parameters, like: 
 
 `discovery_test.DiscoveryTest.test_nodes_fail_not_sequential_zk.nodes_to_kill.2.load_type.ClusterLoad.ATOMIC.ignite_version.ignite-2.11.0`
-   
+
+**Implementation note.** The `ignite-opencensus` metrics module uses the `iin` label to expose the `IgniteInstanceName`
+cluster configuration parameter. So the `ducktests` engine exploits this fact and puts the *test id* to 
+configuration of each ignite node started in scope of particular test.
+
 ### Run with the JMX metrics exporter
 
 To have Ignite nodes export metrics via the JMX use below global parameters. Note that you also might want to enable the 
