@@ -17,10 +17,8 @@
   limitations under the License.
 -->
 
-<!--
-    POM file.
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -30,15 +28,17 @@
         <relativePath>../../parent-internal/pom.xml</relativePath>
     </parent>
 
+    <artifactId>ignite-gatling-plugin</artifactId>
+    <url>https://ignite.apache.org</url>
+
+    <description>Apache Ignite plugin for performance testing in Gatling</description>
+
     <properties>
-        <prometheus.version>0.3.0</prometheus.version>
-        <gatling.version>3.7.6</gatling.version>
+        <scala.version>2.13.8</scala.version>
         <scala.compat.version>2.13</scala.compat.version>
+        <gatling.version>3.7.6</gatling.version>
         <netty.version>2.0.51.Final</netty.version>
     </properties>
-
-    <artifactId>ignite-ducktests</artifactId>
-    <url>http://ignite.apache.org</url>
 
     <dependencies>
         <dependency>
@@ -47,28 +47,8 @@
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ignite-indexing</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ignite-control-utility</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ignite-log4j2</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ignite-gatling-plugin</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>io.gatling</groupId>
-            <artifactId>gatling-app</artifactId>
+            <artifactId>gatling-core</artifactId>
             <version>${gatling.version}</version>
         </dependency>
 
@@ -84,134 +64,58 @@
             <version>${netty.version}</version>
         </dependency>
 
+        <!-- Test -->
         <dependency>
-            <groupId>com.fasterxml.woodstox</groupId>
-            <artifactId>woodstox-core</artifactId>
-            <version>5.0.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.codehaus.woodstox</groupId>
-            <artifactId>stax2-api</artifactId>
-            <version>3.1.4</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.htrace</groupId>
-            <artifactId>htrace-core4</artifactId>
-            <version>4.1.0-incubating</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ignite-core</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ignite-opencensus</artifactId>
-            <version>${project.version}</version>
+            <artifactId>ignite-spring</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>io.opencensus</groupId>
-            <artifactId>opencensus-exporter-stats-prometheus</artifactId>
-            <version>${opencensus.version}</version>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ignite-tools</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient_httpserver</artifactId>
-            <version>${prometheus.version}</version>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.gatling</groupId>
+            <artifactId>gatling-charts</artifactId>
+            <version>${gatling.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.gatling.highcharts</groupId>
+            <artifactId>gatling-charts-highcharts</artifactId>
+            <version>${gatling.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.gatling</groupId>
+            <artifactId>gatling-app</artifactId>
+            <version>${gatling.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
+        <sourceDirectory>src/main/scala</sourceDirectory>
+        <testSourceDirectory>src/test/scala</testSourceDirectory>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>update-versions</id>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <phase>initialize</phase>
-                        <configuration>
-                            <target>
-                                <echo message="Update ignite.version in ducktests" />
-
-                                <replaceregexp byline="true" encoding="UTF-8">
-                                    <regexp pattern="(__version__ = ).*$"/>
-                                    <substitution expression="\1'${project.version}'" />
-                                    <fileset dir="${basedir}/">
-                                        <include name="${project.basedir}/tests/ignitetest/__init__.py" />
-                                    </fileset>
-                                </replaceregexp>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-libs</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <excludeGroupIds>${project.groupId}</excludeGroupIds>
-                            <outputDirectory>target/libs</outputDirectory>
-                            <includeScope>runtime</includeScope>
-                            <excludeTransitive>false</excludeTransitive>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-sources</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>tests</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
@@ -224,8 +128,22 @@
                         <arg>-language:implicitConversions</arg>
                     </args>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>scaladoc</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>doc</goal>
+                            <goal>doc-jar</goal>
+                        </goals>
+                        <configuration>
+                            <doctitle>Ignite Gatling Plugin</doctitle>
+                            <windowtitle>Ignite Gatling Plugin</windowtitle>
+                            <skip>${maven.javadoc.skip}</skip>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
-
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
