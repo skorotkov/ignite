@@ -38,6 +38,14 @@ jobs:
     permissions:
       actions: read
     steps:
+      - name: 'Checkout project'
+        if: github.event_name == 'workflow_run'
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.workflow_run.head_repository.full_name }}
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of Sonar analysis
+
       - name: 'Sonar analysis'
         uses: ./.github/actions/sonar-fork
         with:
