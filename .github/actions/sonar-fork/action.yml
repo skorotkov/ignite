@@ -144,7 +144,7 @@ runs:
         echo "pr_base_ref=$(sed '3q;d' pr-event.txt)" >> "$GITHUB_ENV"
 
     - name: 'Sonar analysis - Maven'
-      if: github.event_name == 'workflow_run' && env.build_type == 'maven'
+      if: github.event_name == 'workflow_run'
       shell: bash
       run: >
         ${{ env.build_command }} -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
@@ -156,7 +156,7 @@ runs:
         ${{ github.event.workflow_run.event == 'pull_request' && format('{0}{1}', '-Dsonar.pullrequest.branch=', env.pr_head_ref) || '' }}
         ${{ github.event.workflow_run.event == 'pull_request' && format('{0}{1}', '-Dsonar.pullrequest.base=', env.pr_base_ref) || '' }}
         -Dsonar.pullrequest.github.summary_comment=true
-        -B -V
+        -V
       env:
         MAVEN_OPTS: "-XX:+UseG1GC -XX:InitialHeapSize=2g -XX:MaxHeapSize=6g -XX:+UseStringDeduplication"
         SONAR_OPTS: "-XX:+UseG1GC -XX:InitialHeapSize=2g -XX:MaxHeapSize=6g -XX:+UseStringDeduplication"
