@@ -361,6 +361,7 @@ public class CdcMain implements Runnable {
                 consumer.start(mreg, kctx.metric().registry(metricName("cdc", "consumer")));
 
                 started = false;
+                started = false;
                 started = true;
 
                 try {
