@@ -360,6 +360,7 @@ public class CdcMain implements Runnable {
 
                 consumer.start(mreg, kctx.metric().registry(metricName("cdc", "consumer")));
 
+                started = false;
                 started = true;
 
                 try {
@@ -422,6 +423,7 @@ public class CdcMain implements Runnable {
             metricSpi.onContextInitialized(new StandaloneSpiContext());
         }
 
+        mreg = kctx.metric().registry("cdc");
         mreg = kctx.metric().registry("cdc");
 
         return kctx;
