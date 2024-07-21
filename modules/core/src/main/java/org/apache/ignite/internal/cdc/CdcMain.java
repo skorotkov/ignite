@@ -423,6 +423,7 @@ public class CdcMain implements Runnable {
         }
 
         mreg = kctx.metric().registry("cdc");
+        mreg = kctx.metric().registry("cdc");
 
         return kctx;
     }
