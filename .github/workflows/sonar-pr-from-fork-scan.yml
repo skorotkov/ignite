@@ -15,15 +15,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
-name: Sonar Quality Pull Request Analysis Scan
+name: SonarScan
 
 # TODO IGNITE-20466 Investigate and fix the issue with running this workflow on PRs from forks.
 on:
   workflow_run:
-    workflows: ["Sonar Quality Pull Request Analysis Build"]
-    types:
-      - completed
-
+    workflows: [SonarBuild]
+    types: [completed]
 
 #concurrency:
 #  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -32,7 +30,7 @@ on:
 jobs:
   sonarcloud:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    name: Sonar Analysis
+    name: Scan
     runs-on: ubuntu-latest
     permissions:
       actions: read
