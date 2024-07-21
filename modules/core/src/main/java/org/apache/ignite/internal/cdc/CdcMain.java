@@ -362,6 +362,7 @@ public class CdcMain implements Runnable {
 
                 started = false;
                 started = false;
+                started = false;
                 started = true;
 
                 try {
