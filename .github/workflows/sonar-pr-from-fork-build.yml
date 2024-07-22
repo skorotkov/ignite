@@ -29,7 +29,7 @@ concurrency:
 jobs:
   build:
     if: github.repository == 'skorotkov/ignite'
-    name: Build
+    name: Build Artifacts for Sonar Analysis
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -74,7 +74,7 @@ jobs:
         shell: bash
         run: |
           pushd ~/.m2/repository
-          find -path "./org.apache.ignite/*" -exec tar -rf repository.tar {} \+
+          find -path "./org/apache/ignite/*" -exec tar -rf repository.tar {} \+
           popd
           mv ~/.m2/repository/repository.tar .
 
