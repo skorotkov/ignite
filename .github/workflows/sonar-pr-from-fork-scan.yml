@@ -34,32 +34,11 @@ jobs:
       actions: read
       checks: write
     steps:
-      - uses: LouisBrunner/checks-action@v2.0.0
-        id: init
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          name: Invoke Sonar Quality Pull Request Analysis
-          status: in_progress
-
       - uses: actions/checkout@v4
         with:
           repository: ${{ github.event.workflow_run.head_repository.full_name }}
           ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
-
-      - name: Set up JDK17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: ${{ env.build_type }}
-
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
 
       - name: Download sonar artifact
         uses: actions/download-artifact@v4
@@ -85,6 +64,29 @@ jobs:
           echo "pr_number=$(sed '1q;d' pr-event.txt)" >> "$GITHUB_ENV"
           echo "pr_head_ref=$(sed '2q;d' pr-event.txt)" >> "$GITHUB_ENV"
           echo "pr_base_ref=$(sed '3q;d' pr-event.txt)" >> "$GITHUB_ENV"
+          echo "pr_head_sha=$(sed '4q;d' pr-event.txt)" >> "$GITHUB_ENV"
+
+      - uses: LouisBrunner/checks-action@v2.0.0
+        id: init
+        with:
+          sha: ${{ env.pr_head_sha }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: Invoke Sonar Quality Pull Request Analysis
+          status: in_progress
+
+      - name: Set up JDK17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: ${{ env.build_type }}
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
       - name: Sonar Analyze Upload
         shell: bash

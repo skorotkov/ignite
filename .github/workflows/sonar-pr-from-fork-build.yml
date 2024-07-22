@@ -65,6 +65,7 @@ jobs:
           echo ${{ github.event.pull_request.number }} >> pr-event.txt
           echo ${{ github.event.pull_request.head.ref }} >> pr-event.txt
           echo ${{ github.event.pull_request.base.ref }} >> pr-event.txt
+          echo ${{ github.event.pull_request.head.sha }} >> pr-event.txt
 
       - name: Prepare target artifact
         shell: bash
