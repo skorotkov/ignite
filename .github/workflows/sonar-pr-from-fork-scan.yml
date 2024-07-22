@@ -83,6 +83,7 @@ jobs:
         run: >
           ./mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
           -P all-java,lgpl,examples,skip-docs
+          -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }}
           -Dsonar.pullrequest.branch=${{ env.pr_head_ref }}
           -Dsonar.pullrequest.base=${{ env.pr_base_ref }}
           -Dsonar.pullrequest.key=${{ env.pr_number }}
