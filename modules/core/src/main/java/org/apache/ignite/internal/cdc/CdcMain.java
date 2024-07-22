@@ -294,8 +294,6 @@ public class CdcMain implements Runnable {
         }
 
         consumer = new WalRecordsConsumer<>(cdcCfg.getConsumer(), log);
-
-        System.err.println("Replace this use of System.err by a logger.");
     }
 
     /** Runs Change Data Capture. */
