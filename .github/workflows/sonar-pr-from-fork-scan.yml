@@ -24,7 +24,6 @@ on:
 
 permissions:
   contents: read
-  checks: write
 
 jobs:
   sonarcloud:
@@ -33,6 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: read
+      checks: write
     steps:
       - uses: LouisBrunner/checks-action@v2.0.0
         id: init
