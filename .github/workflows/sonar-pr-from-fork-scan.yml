@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-name: Sonar Quality Pull Request Analysis
+name: SonarScan
 
 on:
   workflow_run:
@@ -28,7 +28,7 @@ permissions:
 jobs:
   sonarcloud:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    name: Sonar Analysis
+    name: Sonar Quality Pull Request Analysis
     runs-on: ubuntu-latest
     permissions:
       actions: read

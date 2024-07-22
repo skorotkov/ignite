@@ -29,7 +29,7 @@ concurrency:
 jobs:
   build:
     if: github.repository == 'skorotkov/ignite'
-    name: Build Artifacts for Sonar Analysis
+    name: Build Pull Request Artifacts for Sonar Analysis
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
