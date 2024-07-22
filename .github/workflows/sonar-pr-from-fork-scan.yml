@@ -15,30 +15,36 @@
 # specific language governing permissions and limitations
 # under the License.
 
-name: Sonar Quality Branch Analysis
+name: Sonar Quality Pull Request Analysis
 
 on:
-  push:
-    branches:
-      - master
-      - 'ignite-[0-9].[0-9]+.[0-9]+*'
+  workflow_run:
+    workflows: [SonarBuild]
+    types: [completed]
+
+permissions:
+  contents: read
 
 jobs:
   sonarcloud:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Sonar Analysis
-    if: github.repository == 'skorotkov/ignite'
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
     steps:
       - uses: actions/checkout@v4
         with:
+          repository: ${{ github.event.workflow_run.head_repository.full_name }}
+          ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
 
-      - name: Setup JDK11
+      - name: Set up JDK17
         uses: actions/setup-java@v4
         with:
+          java-version: '17'
           distribution: 'temurin'
-          java-version: 11
-          cache: 'maven'
+          cache: ${{ env.build_type }}
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
@@ -47,37 +53,46 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Cache Maven packages
-        uses: actions/cache@v4
+      - name: Download sonar artifact
+        uses: actions/download-artifact@v4
         with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+          name: sonar-artifact
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          merge-multiple: true
 
-      - name: Install Libnuma
-        run: sudo apt-get update && sudo apt-get install libnuma-dev
+      - name: Extract target artifact
+        shell: bash
+        run: tar -xf target.tar
 
-      - name: Build with Maven
+      - name: Extract repository artifact
+        shell: bash
         run: |
-          ./mvnw install -P all-java,lgpl,examples,skip-docs -DskipTests -B -V          
+          mkdir -p ~/.m2/repository
+          tar -xf repository.tar -C ~/.m2/repository
 
-      - name: Setup JDK17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: 17
-          cache: 'maven'
+      - name: Read pull request event
+        shell: bash
+        run: |
+          echo "pr_number=$(sed '1q;d' pr-event.txt)" >> "$GITHUB_ENV"
+          echo "pr_head_ref=$(sed '2q;d' pr-event.txt)" >> "$GITHUB_ENV"
+          echo "pr_base_ref=$(sed '3q;d' pr-event.txt)" >> "$GITHUB_ENV"
 
       - name: Sonar Analyze Upload
+        shell: bash
         run: >
-          ./mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
+          ./mvnw org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
           -P all-java,lgpl,examples,skip-docs
-          -Dsonar.branch.name=${{ github.ref_name }}
+          -Dsonar.pullrequest.branch=${{ env.pr_head_ref }}
+          -Dsonar.pullrequest.base=${{ env.pr_base_ref }}
+          -Dsonar.pullrequest.key= ${{ env.pr_number }}
+          -Dsonar.pullrequest.github.repository=skorotkov/ignite
+          -Dsonar.pullrequest.provider=GitHub
+          -Dsonar.pullrequest.github.summary_comment=true
           -Dsonar.projectKey=skorotkov_ignite
-          -Dsonar.token=${SONARCLOUD_TOKEN}
+          -Dsonar.token=${{ secrets.SONAR_TOKEN }}
           -B -V
         env:
           MAVEN_OPTS: "-XX:+UseG1GC -XX:InitialHeapSize=2g -XX:MaxHeapSize=6g -XX:+UseStringDeduplication"
           SONAR_OPTS: "-XX:+UseG1GC -XX:InitialHeapSize=2g -XX:MaxHeapSize=6g -XX:+UseStringDeduplication"
           JAVA_OPTS: "-XX:+UseG1GC -XX:InitialHeapSize=2g -XX:MaxHeapSize=6g -XX:+UseStringDeduplication"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
