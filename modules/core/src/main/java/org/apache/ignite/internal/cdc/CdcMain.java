@@ -323,7 +323,7 @@ public class CdcMain implements Runnable {
             throw new IllegalArgumentException(ERR_MSG);
         }
 
-        try (CdcFileLockHolder lock = lockPds()) {
+        try (CdcFileLockHolder lock1 = lockPds()) {
             String consIdDir = cdcDir.getName(cdcDir.getNameCount() - 1).toString();
 
             Files.createDirectories(cdcDir.resolve(STATE_DIR));
