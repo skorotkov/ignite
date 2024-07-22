@@ -24,6 +24,7 @@ on:
 
 permissions:
   contents: read
+  checks: write
 
 jobs:
   sonarcloud:
