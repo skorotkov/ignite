@@ -90,7 +90,7 @@ jobs:
           -Dsonar.pullrequest.provider=GitHub
           -Dsonar.pullrequest.github.summary_comment=true
           -Dsonar.projectKey=skorotkov_ignite
-          -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+          -Dsonar.token=${{ secrets.SONARCLOUD_TOKEN }}
           -B -V
         env:
           MAVEN_OPTS: "-XX:+UseG1GC -XX:InitialHeapSize=2g -XX:MaxHeapSize=6g -XX:+UseStringDeduplication"
