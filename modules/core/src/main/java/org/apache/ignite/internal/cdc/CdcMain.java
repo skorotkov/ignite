@@ -270,9 +270,6 @@ public class CdcMain implements Runnable {
     /** Already processed segments. */
     private final Set<Path> processedSegments = new HashSet<>();
 
-    /** Unused to catch in sonar. */
-    private final int unused;
-
     /**
      * @param cfg Ignite configuration.
      * @param ctx Spring resource context.
@@ -297,9 +294,6 @@ public class CdcMain implements Runnable {
         }
 
         consumer = new WalRecordsConsumer<>(cdcCfg.getConsumer(), log);
-
-        unused = 1;
-        System.err.println("Replace this use of System.err by a logger.");
     }
 
     /** Runs Change Data Capture. */
