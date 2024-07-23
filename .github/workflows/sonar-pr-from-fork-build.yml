@@ -29,7 +29,7 @@ concurrency:
 jobs:
   build:
     if: github.repository == 'skorotkov/ignite'
-    name: Build Pull Request Artifacts for Sonar Analysis
+    name: Build artifacts for Sonar Analysis
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -67,33 +67,24 @@ jobs:
           echo ${{ github.event.pull_request.base.ref }} >> pr-event.txt
           echo ${{ github.event.pull_request.head.sha }} >> pr-event.txt
 
-      - name: Prepare target artifact
-        shell: bash
-        run: find -iname "*target" -type d -exec tar -rf target.tar {} \+
-
-#      - name: Prepare repository artifact
-#        shell: bash
-#        run: |
-#          pushd ~/.m2/repository
-#          find -path "./org/apache/ignite/*" -exec tar -rf repository.tar {} \+
-#          popd
-#          mv ~/.m2/repository/repository.tar .
-#
-      - name: Upload target and repository artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: sonar-artifact
-          path: |
-            target.tar
-#            repository.tar
-          if-no-files-found: error
-          retention-days: 1
-
       - name: Upload pull request event artifact
         uses: actions/upload-artifact@v4
         with:
           name: pr-event-artifact
           path: |
             pr-event.txt
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Prepare compiled classes artifact
+        shell: bash
+        run: find -iname "*target" -type d -exec tar -rf target.tar {} \+
+
+      - name: Upload compiled classes artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: target-artifact
+          path: |
+            target.tar
           if-no-files-found: error
           retention-days: 1
