@@ -122,6 +122,14 @@ jobs:
           SONAR_OPTS: "-XX:+UseG1GC -XX:InitialHeapSize=2g -XX:MaxHeapSize=6g -XX:+UseStringDeduplication"
           JAVA_OPTS: "-XX:+UseG1GC -XX:InitialHeapSize=2g -XX:MaxHeapSize=6g -XX:+UseStringDeduplication"
 
+      - uses: geekyeggo/delete-artifact@v5
+        if: always()
+        with:
+          name: |
+            target-artifact
+            pr-event-artifact
+          failOnError: false
+
       - uses: LouisBrunner/checks-action@v2.0.0
         if: always()
         with:
