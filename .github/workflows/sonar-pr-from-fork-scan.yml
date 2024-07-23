@@ -50,6 +50,19 @@ jobs:
           echo "pr_base_ref=$(sed '3q;d' pr-event.txt)" >> "$GITHUB_ENV"
           echo "pr_head_sha=$(sed '4q;d' pr-event.txt)" >> "$GITHUB_ENV"
 
+      - uses: actions/github-script@v6
+        id: job-url
+        with:
+          script: |
+            const { data } = await github.rest.actions.listJobsForWorkflowRunAttempt({
+              ...context.repo,
+              run_id: context.runId,
+              attempt_number: process.env.GITHUB_RUN_ATTEMPT,
+            });
+            
+            return data.jobs[0].html_url
+          result-encoding: string
+
       - uses: LouisBrunner/checks-action@v2.0.0
         id: init
         with:
@@ -57,7 +70,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: Invoke Sonar Quality Pull Request Analysis
           output: |
-            ${{ format('{{"summary": "[Run ...]({0}/{1}/actions/runs/{2})<br/>[Job ...]({0}/{1}/actions/runs/{2}/job/{3})"}}', github.server_url, github.repository, github.run_id, github.job) }}
+            ${{ format('{{"summary": "[Run ...]({0}/{1}/actions/runs/{2})<br/>[Job ...]({3})"}}', github.server_url, github.repository, github.run_id, steps.job-url.outputs.result) }}
           status: in_progress
 
       - uses: actions/checkout@v4
