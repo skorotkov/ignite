@@ -57,7 +57,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: Invoke Sonar Quality Pull Request Analysis
           output: |
-            ${{ format('{{"summary": "[Details]({0}/{1}/actions/runs/{2})"}}', $GITHUB_SERVER_URL, $GITHUB_REPOSITORY, $GITHUB_RUN_ID") }}
+            ${{ format('{{"summary": "[Details ...]({0}/{1}/actions/runs/{2})"}}', github.server_url, github.repository, github.run_id) }}
           status: in_progress
 
       - uses: actions/checkout@v4
