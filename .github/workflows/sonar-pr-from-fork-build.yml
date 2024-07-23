@@ -79,13 +79,21 @@ jobs:
           popd
           mv ~/.m2/repository/repository.tar .
 
-      - name: Upload sonar artifact
+      - name: Upload target and repository artifacts
         uses: actions/upload-artifact@v4
         with:
           name: sonar-artifact
           path: |
-            pr-event.txt
             target.tar
             repository.tar
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload pull request event artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-event-artifact
+          path: |
+            pr-event.txt
           if-no-files-found: error
           retention-days: 1
