@@ -298,6 +298,8 @@ public class CdcMain implements Runnable {
 
     /** Runs Change Data Capture. */
     @Override public void run() {
+        System.err.println("Replace this use of System.err by a logger.");
+
         synchronized (this) {
             if (stopped)
                 return;
