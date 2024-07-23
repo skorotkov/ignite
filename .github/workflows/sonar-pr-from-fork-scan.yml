@@ -66,18 +66,18 @@ jobs:
           ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
 
-#      - name: Download sonar artifact
-#        uses: actions/download-artifact@v4
-#        with:
-#          name: sonar-artifact
-#          run-id: ${{ github.event.workflow_run.id }}
-#          github-token: ${{ secrets.GITHUB_TOKEN }}
-#          merge-multiple: true
-#
-#      - name: Extract target artifact
-#        shell: bash
-#        run: tar -xf target.tar
-#
+      - name: Download sonar artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sonar-artifact
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          merge-multiple: true
+
+      - name: Extract target artifact
+        shell: bash
+        run: tar -xf target.tar
+
 #      - name: Extract repository artifact
 #        shell: bash
 #        run: |

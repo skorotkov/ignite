@@ -67,10 +67,10 @@ jobs:
           echo ${{ github.event.pull_request.base.ref }} >> pr-event.txt
           echo ${{ github.event.pull_request.head.sha }} >> pr-event.txt
 
-#      - name: Prepare target artifact
-#        shell: bash
-#        run: find -iname "*target" -type d -exec tar -rf target.tar {} \+
-#
+      - name: Prepare target artifact
+        shell: bash
+        run: find -iname "*target" -type d -exec tar -rf target.tar {} \+
+
 #      - name: Prepare repository artifact
 #        shell: bash
 #        run: |
@@ -79,15 +79,15 @@ jobs:
 #          popd
 #          mv ~/.m2/repository/repository.tar .
 #
-#      - name: Upload target and repository artifacts
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: sonar-artifact
-#          path: |
-#            target.tar
+      - name: Upload target and repository artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonar-artifact
+          path: |
+            target.tar
 #            repository.tar
-#          if-no-files-found: error
-#          retention-days: 1
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Upload pull request event artifact
         uses: actions/upload-artifact@v4
