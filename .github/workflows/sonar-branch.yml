@@ -52,12 +52,12 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Cache Maven packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+#      - name: Cache Maven packages
+#        uses: actions/cache@v4
+#        with:
+#          path: ~/.m2
+#          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: ${{ runner.os }}-m2
 
       - name: Install Libnuma
         run: sudo apt-get update && sudo apt-get install libnuma-dev
@@ -71,7 +71,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17
-          cache: 'maven'
+#          cache: 'maven'
 
       - name: Sonar Analyze Upload
         run: >
