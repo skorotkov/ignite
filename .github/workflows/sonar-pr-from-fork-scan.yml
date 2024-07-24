@@ -151,7 +151,7 @@ jobs:
 
             await github.rest.checks.update({
               ...context.repo,
-              CHECK_ID,
+              check_run_id: CHECK_ID,
               status: 'completed',
               conclusion: JOB_STATUS
             });
