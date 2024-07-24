@@ -53,11 +53,13 @@ jobs:
         id: check
         with:
           script: |
-            const { jobs } = await github.rest.actions.listJobsForWorkflowRunAttempt({
+            const { data } = await github.rest.actions.listJobsForWorkflowRunAttempt({
               ...context.repo,
               run_id: context.runId,
               attempt_number: process.env.GITHUB_RUN_ATTEMPT,
             });
+
+            const job_url = data.jobs[0].html_url;
 
             const { check } = await github.rest.checks.create({
               ...context.repo,
@@ -66,7 +68,7 @@ jobs:
               status: 'in_progress',
               output: {
                 title: 'Sonar Quality Pull Request Analysis',
-                summary: `[Details ...](${jobs.jobs[0].html_url})`
+                summary: '[Details ...](' + job_url + ')'
               }
             });
 
