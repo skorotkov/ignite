@@ -63,7 +63,7 @@ jobs:
 
       - name: Build with Maven
         run: |
-          ./mvnw install -P all-java,lgpl,examples,skip-docs -DskipTests -B -V          
+          ./mvnw install -P all-java,lgpl,examples,skip-docs -DskipTests -B -V
 
       - name: Setup JDK17
         uses: actions/setup-java@v4

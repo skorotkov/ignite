@@ -57,7 +57,7 @@ jobs:
 
       - name: Build with Maven
         run: |
-          ./mvnw clean install -P all-java,lgpl,examples,skip-docs -DskipTests -B -V          
+          ./mvnw install -P all-java,lgpl,examples,skip-docs -DskipTests -B -V
 
       - name: Prepare compiled classes artifact
         shell: bash
