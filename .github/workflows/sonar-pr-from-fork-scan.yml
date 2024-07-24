@@ -59,7 +59,7 @@ jobs:
               attempt_number: process.env.GITHUB_RUN_ATTEMPT,
             });
 
-            const { check } = await github.octokit.rest.checks.create({
+            const { check } = await github.rest.checks.create({
               ...context.repo,
               name: 'Sonar Quality Pull Request Analysis',
               head_sha: process.env.pr_head_sha,
@@ -144,7 +144,7 @@ jobs:
           script: |
             const { CHECK_ID, JOB_STATUS } = process.env;
 
-            await github.octokit.rest.checks.update({
+            await github.rest.checks.update({
               ...context.repo,
               CHECK_ID,
               status: 'completed',
