@@ -43,7 +43,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
-          cache: 'maven'
 
       - name: Cache local Maven repository
         uses: actions/cache@v4
