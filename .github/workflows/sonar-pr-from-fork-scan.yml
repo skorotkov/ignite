@@ -61,7 +61,7 @@ jobs:
 
             const job_url = data.jobs[0].html_url;
 
-            const { check } = await github.rest.checks.create({
+            const { id } = await github.rest.checks.create({
               ...context.repo,
               name: 'Sonar Quality Pull Request Analysis',
               head_sha: process.env.pr_head_sha,
@@ -72,7 +72,7 @@ jobs:
               }
             });
 
-            return check.id;
+            return id;
           result-encoding: string
 
       - uses: actions/checkout@v4
