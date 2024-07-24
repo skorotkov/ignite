@@ -50,32 +50,35 @@ jobs:
           echo "target_artifact_id=$(sed '5q;d' pr-event.txt)" >> "$GITHUB_ENV"
 
       - uses: actions/github-script@v7
-        id: job-url
+        id: check
         with:
           script: |
-            const { data } = await github.rest.actions.listJobsForWorkflowRunAttempt({
+            const { jobs } = await github.rest.actions.listJobsForWorkflowRunAttempt({
               ...context.repo,
               run_id: context.runId,
               attempt_number: process.env.GITHUB_RUN_ATTEMPT,
             });
-            return data.jobs[0].html_url
-          result-encoding: string
 
-      - uses: LouisBrunner/checks-action@v2.0.0
-        id: init
-        with:
-          sha: ${{ env.pr_head_sha }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          name: Sonar Quality Pull Request Analysis
-          output: |
-            ${{ format('{{"summary": "[Details ...]({0})"}}', steps.job-url.outputs.result) }}
-          status: in_progress
+            const { check } = await github.octokit.rest.checks.create({
+              ...context.repo,
+              name: 'Sonar Quality Pull Request Analysis',
+              head_sha: process.env.pr_head_sha,
+              status: 'in_progress',
+              output: {
+                title: 'Sonar Quality Pull Request Analysis',
+                summary: `[Details ...](${jobs.jobs[0].html_url})`
+              }
+            });
+
+            return check.id;
+          result-encoding: string
 
       - uses: actions/checkout@v4
         with:
           repository: ${{ github.event.workflow_run.head_repository.full_name }}
           ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Download compiled classes artifact
         uses: actions/download-artifact@v4
@@ -85,20 +88,14 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           merge-multiple: true
 
-#      - uses: geekyeggo/delete-artifact@v5
-#        if: always()
-#        with:
-#          name: target-artifact
-#          failOnError: false
-
       - name: Delete compiled classes artifact
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          curl --request DELETE \
-          --url "${{ github.api_url }}/repos/${{ github.repository }}/actions/artifacts/${{ env.target_artifact_id }}" \
-          --header "Accept: application/vnd.github+json" \
-          --header "Authorization: Bearer $GH_TOKEN"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.deleteArtifact({
+              ...context.repo,
+              process.env.target_artifact_id
+            });
 
       - name: Extract compiled classes artifact
         shell: bash
@@ -138,10 +135,26 @@ jobs:
           SONAR_OPTS: "-XX:+UseG1GC -XX:InitialHeapSize=2g -XX:MaxHeapSize=6g -XX:+UseStringDeduplication"
           JAVA_OPTS: "-XX:+UseG1GC -XX:InitialHeapSize=2g -XX:MaxHeapSize=6g -XX:+UseStringDeduplication"
 
-      - uses: LouisBrunner/checks-action@v2.0.0
+      - uses: actions/github-script@v7
         if: always()
+        env:
+          CHECK_ID: ${{ steps.check.outputs.result }}
+          JOB_STATUS: ${{ job.status }}
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          check_id: ${{ steps.init.outputs.check_id }}
-          status: completed
-          conclusion: ${{ job.status }}
+          script: |
+            const { CHECK_ID, JOB_STATUS } = process.env;
+
+            await github.octokit.rest.checks.update({
+              ...context.repo,
+              CHECK_ID,
+              status: 'completed',
+              conclusion: JOB_STATUS
+            });
+
+#      - uses: LouisBrunner/checks-action@v2.0.0
+#        if: always()
+#        with:
+#          token: ${{ secrets.GITHUB_TOKEN }}
+#          check_id: ${{ steps.init.outputs.check_id }}
+#          status: completed
+#          conclusion: ${{ job.status }}
