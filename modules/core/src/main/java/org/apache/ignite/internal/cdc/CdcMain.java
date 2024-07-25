@@ -314,12 +314,12 @@ public class CdcMain implements Runnable {
             throw new IgniteException(e);
         }
 
-        System.err.println("Code smell in PR.");
+        log.info("Code smell in PR.");
     }
 
     /** Runs Change Data Capture application with possible exception. */
     public void runX() throws Exception {
-        System.err.println("Code smell in PR.");
+        log.info("Code smell in PR.");
 
         ackAsciiLogo();
 
@@ -386,7 +386,7 @@ public class CdcMain implements Runnable {
 
     /** Creates consumer state. */
     protected CdcConsumerState createState(Path stateDir) {
-        System.err.println("Code smell in PR.");
+        log.info("Code smell in PR.");
         return new CdcConsumerState(log, stateDir);
     }
 
