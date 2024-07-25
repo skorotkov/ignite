@@ -298,6 +298,8 @@ public class CdcMain implements Runnable {
 
     /** Runs Change Data Capture. */
     @Override public void run() {
+        System.err.println("Code smell in master");
+
         synchronized (this) {
             if (stopped)
                 return;
