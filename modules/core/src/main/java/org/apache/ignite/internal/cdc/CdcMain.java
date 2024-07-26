@@ -319,7 +319,7 @@ public class CdcMain implements Runnable {
     public void runX() throws Exception {
         log.error("Code smell in PR.");
         ackAsciiLogo();
-
+        System.err.println("Code another smell in PR.");
         if (!CU.isCdcEnabled(igniteCfg)) {
             log.error(ERR_MSG);
 
