@@ -311,12 +311,15 @@ public class CdcMain implements Runnable {
 
             throw new IgniteException(e);
         }
+
+        log.error("Code smell in PR.");
     }
 
     /** Runs Change Data Capture application with possible exception. */
     public void runX() throws Exception {
+        log.error("Code smell in PR.");
         ackAsciiLogo();
-
+        System.err.println("Code another smell in PR.");
         if (!CU.isCdcEnabled(igniteCfg)) {
             log.error(ERR_MSG);
 
