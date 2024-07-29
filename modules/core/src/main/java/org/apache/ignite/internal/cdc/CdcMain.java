@@ -315,6 +315,7 @@ public class CdcMain implements Runnable {
 
     /** Runs Change Data Capture application with possible exception. */
     public void runX() throws Exception {
+        System.err.println("Code smell in PR.");
         ackAsciiLogo();
 
         if (!CU.isCdcEnabled(igniteCfg)) {
