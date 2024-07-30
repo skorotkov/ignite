@@ -46,6 +46,7 @@ class IgniteConfiguration(NamedTuple):
     consistent_id: str = None
     ignite_instance_name: str = None
     failure_detection_timeout: int = 10000
+    client_failure_detection_timeout: int = 30000
     sys_worker_blocked_timeout: int = 10000
     properties: str = None
     data_storage: DataStorageConfiguration = None
@@ -74,6 +75,7 @@ class IgniteConfiguration(NamedTuple):
     auto_activation_enabled: bool = None
     transaction_configuration: TransactionConfiguration = None
     sql_configuration: Bean = None
+    network_send_retry_count: int = None
 
     def prepare_ssl(self, test_globals, shared_root):
         """
