@@ -484,6 +484,45 @@ class IgniteAwareService(BackgroundThreadService, IgnitePathAware, JvmProcessMix
 
         return out
 
+    def corrupt_network(self, nodes):
+        self.exec_on_nodes_async(nodes, lambda n: self.__corrupt_network(n))
+
+    def restore_network(self, nodes):
+        self.exec_on_nodes_async(nodes, lambda n: self.__restore_network(n))
+
+    def __corrupt_network(self, node):
+        network_interface = node.account.ssh_output("ip route | grep default | awk -- '{printf $5}'")
+        network_interface = network_interface.decode(sys.getdefaultencoding()).strip()
+
+        self.logger.info(f"Corrupting network on node {node.name} on interface {network_interface}")
+
+        out, _ = IgniteAwareService.exec_command_ex(node, "sudo tc qdisc")
+        self.logger.info(f"Settings before {out}")
+
+        node.account.ssh(f"sudo tc qdisc add dev {network_interface} root handle 1:0 prio priomap 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2")
+        node.account.ssh(f"sudo tc filter add dev {network_interface} protocol ip parent 1:0 u32 match ip sport 22 0xffff flowid 1:1")
+        node.account.ssh(f"sudo tc filter add dev {network_interface} protocol ip parent 1:0 u32 match ip sport 8082 0xffff flowid 1:1")
+        node.account.ssh(f"sudo tc filter add dev {network_interface} protocol ip parent 1:0 u32 match ip sport 9100 0xffff flowid 1:1")
+        node.account.ssh(f"sudo tc qdisc add dev {network_interface} parent 1:3 netem corrupt 15%")
+        # node.account.ssh(f"sudo tc qdisc add dev {network_interface} parent 1:3 netem loss random 20%")
+
+        out, _ = IgniteAwareService.exec_command_ex(node, "sudo tc qdisc")
+        self.logger.info(f"Settings after {out}")
+
+    def __restore_network(self, node):
+        network_interface = node.account.ssh_output("ip route | grep default | awk -- '{printf $5}'")
+        network_interface = network_interface.decode(sys.getdefaultencoding()).strip()
+
+        self.logger.info(f"Restoring network on node {node.name} on interface {network_interface}")
+
+        out, _ = IgniteAwareService.exec_command_ex(node, "sudo tc qdisc")
+        self.logger.info(f"Settings before {out}")
+
+        node.account.ssh(f"sudo tc qdisc del dev {network_interface} root")
+
+        out, _ = IgniteAwareService.exec_command_ex(node, "sudo tc qdisc")
+        self.logger.info(f"Settings after {out}")
+
     def __update_node_log_file(self, node):
         """
         Update the node log file.
