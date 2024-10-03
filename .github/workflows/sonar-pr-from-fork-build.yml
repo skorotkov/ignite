@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   build:
-    if: github.repository == 'apache/ignite'
+    if: github.repository == 'skorotkov/ignite'
     name: Build artifacts for Sonar Analysis
     runs-on: ubuntu-latest
     steps:

@@ -30,7 +30,7 @@ concurrency:
 jobs:
   sonarcloud:
     name: Sonar Analysis
-    if: github.repository == 'apache/ignite'
+    if: github.repository == 'skorotkov/ignite'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
