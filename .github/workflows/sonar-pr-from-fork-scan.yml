@@ -149,7 +149,7 @@ jobs:
           -Dsonar.pullrequest.github.repository=skorotkov/ignite
           -Dsonar.pullrequest.provider=GitHub
           -Dsonar.pullrequest.github.summary_comment=true
-          -Dsonar.projectKey=apache_ignite
+          -Dsonar.projectKey=skorotkov_ignite
           -Dsonar.token=${{ secrets.SONARCLOUD_TOKEN }}
           -B -V
         env:
