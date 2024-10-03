@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   sonarcloud:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.repository == 'apache/ignite' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.repository == 'skorotkov/ignite' }}
     name: Sonar Analysis
     runs-on: ubuntu-latest
     permissions:
