@@ -484,44 +484,74 @@ class IgniteAwareService(BackgroundThreadService, IgnitePathAware, JvmProcessMix
 
         return out
 
-    def corrupt_network(self, nodes):
-        self.exec_on_nodes_async(nodes, lambda n: self.__corrupt_network(n))
+    def corrupt_network_packets(self, nodes, pct):
+        """Apply corruption for pct% of network packets"""
+        self.apply_netem_options(nodes, f"corrupt {pct}%")
+
+    def loss_network_packets(self, nodes, pct):
+        """Apply loss of pct% random network packets"""
+        self.apply_netem_options(nodes, f"loss random {pct}%")
+
+    def apply_netem_options(self, nodes, netem_opts):
+        """
+        Apply arbitrary Network Emulator (netem) OPTIONS on nodes via Traffic Control (tc).
+
+        It may be used to inject various types of network errors, e.g.:
+            - packet corruption
+            - packet loss
+            - duplication
+            - reordering
+            - rate limiting
+            - delay
+
+        See https://man7.org/linux/man-pages/man8/tc-netem.8.html for OPTIONS syntax.
+
+        :param nodes: nodes to apply settings
+        :param netem_opts: netem OPTIONS
+        """
+        self.exec_on_nodes_async(nodes, lambda n: self.__apply_netem_options(n, netem_opts))
 
     def restore_network(self, nodes):
-        self.exec_on_nodes_async(nodes, lambda n: self.__restore_network(n))
+        """Remove previously applied Network Emulator (netem) OPTIONS on nodes."""
+        self.exec_on_nodes_async(nodes, lambda n: self.__reset_netem_options(n))
 
-    def __corrupt_network(self, node):
-        network_interface = node.account.ssh_output("ip route | grep default | awk -- '{printf $5}'")
-        network_interface = network_interface.decode(sys.getdefaultencoding()).strip()
+    def __apply_netem_options(self, node, netem_opts):
+        """Apply Network Emulator (netem) OPTIONS on node on default network interface"""
+        network_interface = self.__get_default_network_interface(node)
 
-        self.logger.info(f"Corrupting network on node {node.name} on interface {network_interface}")
+        self.logger.info(f"Apply netem options \"{netem_opts}\" on node {node.name} on interface {network_interface}")
 
         out, _ = IgniteAwareService.exec_command_ex(node, "sudo tc qdisc")
-        self.logger.info(f"Settings before {out}")
+        self.logger.info(f"tc qdisc settings on node {node.name} before: {out}")
 
         node.account.ssh(f"sudo tc qdisc add dev {network_interface} root handle 1:0 prio priomap 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2")
         node.account.ssh(f"sudo tc filter add dev {network_interface} protocol ip parent 1:0 u32 match ip sport 22 0xffff flowid 1:1")
         node.account.ssh(f"sudo tc filter add dev {network_interface} protocol ip parent 1:0 u32 match ip sport 8082 0xffff flowid 1:1")
         node.account.ssh(f"sudo tc filter add dev {network_interface} protocol ip parent 1:0 u32 match ip sport 9100 0xffff flowid 1:1")
-        node.account.ssh(f"sudo tc qdisc add dev {network_interface} parent 1:3 netem corrupt 15%")
-        # node.account.ssh(f"sudo tc qdisc add dev {network_interface} parent 1:3 netem loss random 20%")
+        node.account.ssh(f"sudo tc qdisc add dev {network_interface} parent 1:3 netem {netem_opts}")
 
         out, _ = IgniteAwareService.exec_command_ex(node, "sudo tc qdisc")
-        self.logger.info(f"Settings after {out}")
+        self.logger.info(f"tc qdisc settings on node {node.name} after: {out}")
 
-    def __restore_network(self, node):
-        network_interface = node.account.ssh_output("ip route | grep default | awk -- '{printf $5}'")
-        network_interface = network_interface.decode(sys.getdefaultencoding()).strip()
+    def __reset_netem_options(self, node):
+        """Remove previously applied Network Emulator (netem) OPTIONS on node on default network interface"""
+        network_interface = self.__get_default_network_interface(node)
 
-        self.logger.info(f"Restoring network on node {node.name} on interface {network_interface}")
+        self.logger.info(f"Reset netem options on node {node.name} on interface {network_interface}")
 
         out, _ = IgniteAwareService.exec_command_ex(node, "sudo tc qdisc")
-        self.logger.info(f"Settings before {out}")
+        self.logger.info(f"tc qdisc settings on node {node.name} before: {out}")
 
         node.account.ssh(f"sudo tc qdisc del dev {network_interface} root")
 
         out, _ = IgniteAwareService.exec_command_ex(node, "sudo tc qdisc")
-        self.logger.info(f"Settings after {out}")
+        self.logger.info(f"tc qdisc settings on node {node.name} after: {out}")
+
+    @staticmethod
+    def __get_default_network_interface(node):
+        return node.account.ssh_output("ip route | grep default | awk -- '{printf $5}'") \
+            .decode(sys.getdefaultencoding()) \
+            .strip()
 
     def __update_node_log_file(self, node):
         """
